@@ -1,0 +1,49 @@
+app: web
+debug: true
+db:
+  picture:
+    dialect: mysql
+    dsn: root:123456@tcp(127.0.0.1:3306)/picture?charset=utf8mb4&parseTime=True&loc=Local
+  poetry:
+    dialect: mysql
+    dsn: root:123456@tcp(127.0.0.1:3306)/poetry?charset=utf8mb4&parseTime=True&loc=Local
+  market:
+    dialect: mysql
+    dsn: root:123456@tcp(127.0.0.1:3306)/market-api?charset=utf8mb4&parseTime=True&loc=Local
+  student:
+    dialect: mysql
+    dsn: root:123456@tcp(127.0.0.1:3306)/student?charset=utf8mb4&parseTime=True&loc=Local
+redis:
+  clients:
+    web:
+      addrs:
+        - 127.0.0.1:6379
+      db: 0
+      password:
+      type: single-node
+  default: default
+log:
+  outputs:
+    - stdout
+    - ./logs/api.log
+elasticsearch:
+  engine:
+    chinese_indices: chinese.book.student.alias
+    addresses:
+      - http://127.0.0.1:9200
+    username: admin
+    password: 123456
+rabbitmq:
+  engine:
+    addresses: localhost:5672/
+    username: myuser
+    password: mypass
+    queue-name: order
+cron:
+  switch: true
+wechat:
+  appid: "wx2afb8412b1111"
+  secret: "82c2222d4e09230a06f8132b04577"
+  mch-id: "12292970"
+  mch-cert: "68D1E3F07BDE46784AA91078FFF65323AE5C4"
+  mch-iv3: "wzs920516371526000789cdfh9090"

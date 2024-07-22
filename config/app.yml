@@ -10,9 +10,9 @@ db:
   market:
     dialect: mysql
     dsn: root:123456@tcp(127.0.0.1:3306)/market-api?charset=utf8mb4&parseTime=True&loc=Local
-  student:
+  story:
     dialect: mysql
-    dsn: root:123456@tcp(127.0.0.1:3306)/student?charset=utf8mb4&parseTime=True&loc=Local
+    dsn: root:123456@tcp(127.0.0.1:3306)/story?charset=utf8mb4&parseTime=True&loc=Local
 redis:
   clients:
     web:
@@ -40,7 +40,7 @@ rabbitmq:
     password: mypass
     queue-name: order
 cron:
-  switch: true
+  switch: false
 wechat:
   appid: "wx2afb8412b1111"
   secret: "82c2222d4e09230a06f8132b04577"

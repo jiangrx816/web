@@ -26,5 +26,8 @@ func All() func(r *gin.Engine) {
 
 		// 古诗库
 		Poetry(prefixRouter)
+
+		// 下载库
+		Download(prefixRouter)
 	}
 }

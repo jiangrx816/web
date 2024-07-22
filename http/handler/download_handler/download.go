@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"sync"
 	downloadResq "web/common/response/download"
 	downloadReq "web/common/resquest/download"
@@ -20,18 +21,18 @@ type response struct {
 // ApiAlbumList 获取对应的列表
 func (dh *DownloadHandler) ApiAlbumList(ctx *gin.Context) {
 
+	value := ctx.Query("index")
 	var responseR response
-	albumId := ctx.Query("album_id")
-	if albumId == "" {
-		responseR.Info = "参数缺失"
-		ctx.JSON(errs.SucResp(responseR))
-	}
-	dh.updateBatchMp3(albumId)
-	responseR.Info = albumId
+	albumId := []string{"2314|1127206", "2314|1122188", "2316|1119263", "2316|1114687", "2312|1124536", "2310|1114760", "2312|1111574", "1248|1114673", "2316|1111644", "2314|1123154", "2312|1111551", "2314|1111573", "2314|1122181", "2314|1120004", "2314|1111636", "2314|1120001", "2314|1121256", "2314|1122183", "2310|1112847", "2310|1112858", "2310|1120412", "2310|1120469", "2310|1120470", "2310|1122276", "2310|1121253", "2310|1111635", "2310|1122049", "2310|1120005", "2312|1121292", "2312|1121926", "2316|1117038", "2312|1119997", "2312|1120006", "2310|1114242", "2310|1112496", "2310|1123157", "2310|1113726", "2312|1121294", "2312|1121255", "2310|1121056", "2310|1121254", "2312|1122182", "2312|1123297", "2310|1123405", "12811|1111468", "12811|1111474", "12811|1111479", "12811|1120384", "12811|1120385", "12811|1111472", "12816|1120399", "12816|1114284", "113019|1113444", "113019|1112862"}
+	index, _ := strconv.Atoi(value)
+	dh.updateBatchMp3(albumId[index])
+
+	responseR.Info = albumId[index]
 	ctx.JSON(errs.SucResp(responseR))
 }
 
 func (dh *DownloadHandler) updateBatchMp3(albumId string) {
+
 	var albumInfoList []story.SStoryAlbumInfo
 	model.DefaultStory().Model(&story.SStoryAlbumInfo{}).Debug().Where("album_id = ?", albumId).Order("id asc").Find(&albumInfoList)
 	for idx, _ := range albumInfoList {
@@ -78,7 +79,13 @@ func (dh *DownloadHandler) updateBatchMp3(albumId string) {
 
 		var albumInfoTemp story.SStoryAlbumInfo
 		if len(audioDetailInfoList) > 0 {
-			albumInfoTemp.AudioMp3 = audioDetailInfoList[0].AudioURL
+			if audioDetailInfoList[0].AudioURL != "" {
+				albumInfoTemp.AudioMp3 = audioDetailInfoList[0].AudioURL
+			} else {
+				if audioDetailInfoList[0].AudioTestURL != "" {
+					albumInfoTemp.AudioMp3 = audioDetailInfoList[0].AudioTestURL
+				}
+			}
 		}
 
 		model.DefaultStory().Model(&story.SStoryAlbumInfo{}).Debug().Where("id = ?", albumInfoList[idx].Id).Updates(&albumInfoTemp)

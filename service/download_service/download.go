@@ -3,6 +3,7 @@ package download_service
 import (
 	"fmt"
 	rxLog "github.com/jiangrx816/gopkg/log"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -333,4 +334,96 @@ func countFiles(dir string) (int, error) {
 	})
 
 	return fileCount, err
+}
+
+func (ds *DownloadService) MoveFileToPath() {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go walkDir(dirPathRoot, copyFile, &wg)
+
+	wg.Wait()
+	fmt.Println("All files have been moved.")
+}
+
+func walkDir(dir string, copyFile func(string, string) error, wg *sync.WaitGroup) {
+	defer wg.Done()
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by returning filepath.WalkErr: %v\n", err)
+			return err
+		}
+		if !info.IsDir() && filepath.Ext(path) == ".jpg" {
+			if match, _ := regexp.MatchString(`/\d+\.jpg$`, path); match {
+				matches := regexp.MustCompile(`/(\d+)/\d+\.jpg$`).FindStringSubmatch(path)
+				if len(matches) > 1 {
+					//matchList := regexp.MustCompile(`/\d+\.jpg$`).FindStringSubmatch(path)
+					newPath := "/Users/jiang/demo/book1/86" + matches[1]
+					destinationFile := filepath.Join(newPath, filepath.Base(path))
+					// 创建目标目录（如果不存在）
+					err := os.MkdirAll(newPath, os.ModePerm)
+					if err != nil {
+						fmt.Println("创建目录失败:", err)
+					}
+
+					if err := copyFile(path, destinationFile); err != nil {
+						fmt.Printf("failed to move file: %v\n", err)
+					}
+				}
+			}
+		}
+
+		if !info.IsDir() && filepath.Ext(path) == ".mp3" {
+			if match, _ := regexp.MatchString(`page_audio_\d+\.mp3$`, path); match {
+				matches := regexp.MustCompile(`/(\d+)/page_audio_\d+\.mp3$`).FindStringSubmatch(path)
+				if len(matches) > 1 {
+					//matchList := regexp.MustCompile(`/page_audio_\d+\.mp3$`).FindStringSubmatch(path)
+					newPath := "/Users/jiang/demo/book1/86" + matches[1]
+					destinationFile := filepath.Join(newPath, filepath.Base(path))
+					// 创建目标目录（如果不存在）
+					err := os.MkdirAll(newPath, os.ModePerm)
+					if err != nil {
+						fmt.Println("创建目录失败:", err)
+					}
+
+					if err := copyFile(path, destinationFile); err != nil {
+						fmt.Printf("failed to move file: %v\n", err)
+					}
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		fmt.Printf("error walking the path: %v\n", err)
+	}
+}
+
+// copyFile 复制文件从 src 到 dst
+func copyFile(src, dst string) error {
+
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destinationFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destinationFile.Close()
+
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return err
+	}
+
+	// 确保文件复制成功
+	err = destinationFile.Sync()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -12,7 +12,7 @@ func Download() *cli.Command {
 		Action: func(c *cli.Context) error {
 			var downloadService download_service.DownloadService
 			//将背景图与内容图进行合并成一张图片
-			downloadService.FFMpegImageMergeBGToSub()
+			downloadService.MoveFileToPath()
 
 			//将图片与MP3合成为视频
 			//downloadService.FFMpegImageToVideo()

@@ -4,3 +4,4 @@ temp/
 .idea/
 tmp/
 .DS_Store
+config/local.yml

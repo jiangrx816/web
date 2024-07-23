@@ -11,7 +11,10 @@ func Download() *cli.Command {
 		Usage: "./main download",
 		Action: func(c *cli.Context) error {
 			var downloadService download_service.DownloadService
-			downloadService.DownloadImgList()
+			//downloadService.GetFileCount()
+			//downloadService.DownloadImgList()
+
+			downloadService.ReadDirList()
 			return nil
 		},
 	}

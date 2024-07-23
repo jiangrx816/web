@@ -3,6 +3,11 @@ package download_service
 import (
 	"fmt"
 	rxLog "github.com/jiangrx816/gopkg/log"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -148,4 +153,162 @@ func (ds *DownloadService) fileUrlSaveToLog(startIndex, endIndex int) {
 	}
 
 	wg.Wait()
+}
+
+func (ds *DownloadService) ReadDirList() {
+	root := "/Users/jiang/demo/book"
+
+	// 遍历根目录下的所有文件夹
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 如果是目录，读取该目录下的所有文件
+		if info.IsDir() && path != root {
+			fmt.Println("Directory:", path)
+			files, err := ioutil.ReadDir(path)
+			if err != nil {
+				return err
+			}
+			for _, file := range files {
+				if !file.IsDir() {
+
+					filePathSource := path + "/" + file.Name()
+					contains := ds.isPageBg(filePathSource)
+					if contains {
+						newPath := ds.makePageSub(filePathSource)
+						ds.execFfmpegCommand(filePathSource, newPath)
+					}
+				}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("Error walking the path %v: %v\n", root, err)
+	}
+}
+
+func (ds *DownloadService) execFfmpegCommand(pageBg, pageSub string) {
+	outFile := ds.ffmpegCommandOutFile(pageBg)
+	// 构造FFmpeg命令
+	cmd := exec.Command("ffmpeg", "-i", pageBg, "-i", pageSub, "-filter_complex", "[0][1]overlay=0:0", outFile)
+	// 运行命令
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("Error executing FFmpeg command:", err)
+		return
+	}
+	// 输出命令执行结果
+	fmt.Println(string(output))
+}
+
+func (ds *DownloadService) ffmpegCommandOutFile(originalPath string) (outFile string) {
+
+	// 提取目录和文件名
+	dir := filepath.Dir(originalPath)
+	filename := filepath.Base(originalPath)
+
+	// 分割文件名和扩展名
+	nameParts := strings.Split(filename, "_")
+	if len(nameParts) < 2 {
+		fmt.Println("Unexpected file name format")
+		return
+	}
+
+	// 获取最后一个部分（即“4.jpg”）
+	newFilename := nameParts[len(nameParts)-1]
+
+	// 构造新的路径
+	newPath := filepath.Join(dir, newFilename)
+
+	// 输出新的路径
+	fmt.Println(newPath)
+	outFile = newPath
+	return
+}
+
+func (ds *DownloadService) isPageBg(imgPath string) (contains bool) {
+	// 要查找的子字符串
+	substr := "page_bg_"
+	// 判断字符串中是否包含子字符串
+	if strings.Contains(imgPath, substr) {
+		contains = true
+		return
+	}
+	return
+}
+
+func (ds *DownloadService) makePageSub(imgPath string) (newPath string) {
+	// 定义正则表达式，匹配 "page_bg_X.jpg"
+	re := regexp.MustCompile(`page_bg_(\d+)\.jpg`)
+
+	newPath = re.ReplaceAllString(imgPath, "page_sub_${1}.png")
+	return
+}
+
+func (ds *DownloadService) GetFileCount() {
+	root := "/Users/jiang/demo/book"
+	countFilesInSubdirectories(root)
+}
+
+func countFilesInSubdirectories(root string) {
+	// 打开根目录
+	dirEntries, err := os.ReadDir(root)
+	if err != nil {
+		fmt.Println("Error reading directory:", err)
+		return
+	}
+
+	// 遍历根目录中的条目
+	for _, entry := range dirEntries {
+		if entry.IsDir() {
+			// 获取子目录路径
+			subdir := filepath.Join(root, entry.Name())
+
+			// 统计子目录中的文件数量
+			fileCount, err := countFiles(subdir)
+			if err != nil {
+				fmt.Printf("Error counting files in directory %s: %v\n", subdir, err)
+				continue
+			}
+
+			// 输出子目录文件数量
+			if fileCount < 15 {
+				//fmt.Printf("Directory: %s, File count: %d\n", subdir, fileCount)
+				// 定义正则表达式，用于匹配数字
+				re := regexp.MustCompile(`\d+`)
+				// 提取字符串中的数字
+				numbers := re.FindAllString(subdir, -1)
+				if len(numbers) > 0 {
+					//fmt.Println(numbers[0])
+					utils.AppendToFile("/Users/jiang/demo/book1.log", numbers[0]+",")
+				}
+			}
+		}
+	}
+}
+
+func countFiles(dir string) (int, error) {
+	// 初始化文件计数器
+	fileCount := 0
+
+	// 遍历目录
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 如果是文件，计数器加1
+		if !info.IsDir() {
+			fileCount++
+		}
+
+		return nil
+	})
+
+	return fileCount, err
 }

@@ -10,6 +10,22 @@ import (
 	"os"
 )
 
+// UrlExists 判断远程url是否存在
+func UrlExists(url string) bool {
+	resp, err := http.Head(url)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		return true
+	}
+	return false
+}
+
+// DownloadFile 将远程文件下载到本地
 func DownloadFile(url, path, filepath string) error {
 	ExistDir(path)
 	// 创建文件
@@ -95,4 +111,28 @@ func readFileContentOnce(filename string) ([]byte, error) {
 		return nil, err
 	}
 	return content, nil
+}
+
+// AppendToFile 将字符串内容追加到指定的文件
+func AppendToFile(fileName, text string) error {
+	// 打开文件，使用 os.O_APPEND 追加模式
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+	_, err = writer.WriteString(text + "\n")
+	if err != nil {
+		return fmt.Errorf("failed to write to file: %w", err)
+	}
+
+	// 确保数据被刷新到文件中
+	err = writer.Flush()
+	if err != nil {
+		return fmt.Errorf("failed to flush writer: %w", err)
+	}
+
+	return nil
 }

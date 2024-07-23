@@ -1,10 +1,8 @@
 package base
 
 import (
-	"context"
 	"github.com/robfig/cron/v3"
 	"github.com/spf13/viper"
-	"web/utils"
 )
 
 type Cron interface {
@@ -42,8 +40,4 @@ func initFromViper(c *cron.Cron, cronList []Cron) error {
 	}
 	c.Start()
 	return nil
-}
-
-func BuildCtx() context.Context {
-	return context.WithValue(context.Background(), "x-request-id", utils.GenUUID())
 }

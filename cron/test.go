@@ -3,6 +3,7 @@ package cron
 import (
 	"github.com/jiangrx816/gopkg/log"
 	rxCron "web/cron/base"
+	"web/utils"
 )
 
 type TestSecond struct {
@@ -17,7 +18,7 @@ func (ts *TestSecond) Spec() string {
 }
 
 func (ts *TestSecond) Run() {
-	log.SugarContext(rxCron.BuildCtx()).Infow("每秒执行一次")
+	log.SugarContext(utils.BuildRequestIdCtx()).Infow("每秒执行一次")
 }
 
 type TestMinute struct {
@@ -32,5 +33,5 @@ func (tm *TestMinute) Spec() string {
 }
 
 func (tm *TestMinute) Run() {
-	log.SugarContext(rxCron.BuildCtx()).Infow("没分执行一次")
+	log.SugarContext(utils.BuildRequestIdCtx()).Infow("没分执行一次")
 }

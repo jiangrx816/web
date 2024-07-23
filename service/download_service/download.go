@@ -212,8 +212,130 @@ func (ds *DownloadService) processDir(dirPath string, wg *sync.WaitGroup, sem ch
 	}
 }
 
-func (ds *DownloadService) FFMpegImageToVideo() {
+func (ds *DownloadService) ExecSh() {
+	rootDir := "/Users/jiang/demo/shell/items"
+	numWorkers := 10
 
+	// 创建一个 channel 用于传递 shell 脚本路径
+	scriptChan := make(chan string, numWorkers)
+	var wg sync.WaitGroup
+
+	// 启动工作 goroutines
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			for scriptPath := range scriptChan {
+				fmt.Printf("worker %d: 执行脚本 %s\n", id, scriptPath)
+				if err := executeShellScript(scriptPath); err != nil {
+					fmt.Printf("worker %d: 执行脚本 %s 时出错: %v\n", id, scriptPath, err)
+				}
+			}
+		}(i)
+	}
+
+	// 遍历根目录并发送脚本路径到 channel
+	go func() {
+		defer close(scriptChan)
+		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				fmt.Printf("访问文件 %s 时出错: %v\n", path, err)
+				return err
+			}
+			if !info.IsDir() && filepath.Ext(path) == ".sh" {
+				scriptChan <- path
+			}
+			return nil
+		})
+		if err != nil {
+			fmt.Printf("遍历路径 %s 时出错: %v\n", rootDir, err)
+		}
+	}()
+
+	// 等待所有 goroutines 完成
+	wg.Wait()
+	fmt.Println("所有脚本执行完成。")
+}
+
+// executeShellScript 执行 shell 脚本文件
+func executeShellScript(filePath string) error {
+	cmd := exec.Command("sh", filePath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func (ds *DownloadService) FFMpegImageToVideo() {
+	//ffmpeg  -thread_queue_size 96   -loop 1   -t  2  -y -r 1 -i  /Users/jiang/demo/book1/8610011/2.jpg   -i   /Users/jiang/demo/book1/8610011/page_audio_2.mp3  -x264-params keyint=1:scenecut=0  -vf "scale=2800:-2"   -absf aac_adtstoasc -s 1280x720 -c:v libx264 -pix_fmt yuv420p   /Users/jiang/demo/mp4/8610011-4.mp4  2>&1
+	rootDir := "/Users/jiang/demo/book1"
+	numWorkers := 10
+
+	// 创建一个 channel 用于传递目录路径
+	dirChan := make(chan string, numWorkers)
+	var wg sync.WaitGroup
+
+	// 启动工作 goroutines
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			for dirPath := range dirChan {
+				fileCount := countFilesInDir(dirPath, id)
+				fmt.Printf("worker %d: directory %s, file count: %d\n", id, dirPath, fileCount/2)
+
+				for ii := 1; ii <= fileCount/2; ii++ {
+					if number, _ := extractNumber(dirPath); number > 0 {
+						fileP := "/Users/jiang/demo/shell/" + strconv.Itoa(number) + ".sh"
+						utils.CreateFile(fileP)
+						ffm := `ffmpeg  -thread_queue_size 96   -loop 1   -t  2  -y -r 1 -i  ` + dirPath + `/` + strconv.Itoa(ii) + `.jpg   -i ` + dirPath + `/page_audio_` + strconv.Itoa(ii) + `.mp3  -x264-params keyint=1:scenecut=0  -vf "scale=2800:-2"   -absf aac_adtstoasc -s 1280x720 -c:v libx264 -pix_fmt yuv420p   ` + dirPath + `/` + strconv.Itoa(ii) + `.mp4  2>&1`
+						utils.AppendToFile(fileP, ffm)
+					}
+				}
+			}
+		}(i)
+	}
+
+	// 遍历根目录并发送子目录路径到 channel
+	go func() {
+		defer close(dirChan)
+		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				fmt.Printf("访问文件 %s 时出错: %v\n", path, err)
+				return err
+			}
+			if info.IsDir() && path != rootDir {
+				dirChan <- path
+			}
+			return nil
+		})
+		if err != nil {
+			fmt.Printf("遍历路径 %s 时出错: %v\n", rootDir, err)
+		}
+	}()
+
+	// 等待所有 goroutines 完成
+	wg.Wait()
+	fmt.Println("所有目录处理完成。")
+}
+
+// countFilesInDir 计算目录中的文件数量
+func countFilesInDir(dirPath string, workerID int) int {
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		fmt.Printf("worker %d: 读取目录 %s 时出错: %v\n", workerID, dirPath, err)
+		return 0
+	}
+	return len(files)
+}
+
+// extractNumber 从给定的字符串中提取数字
+func extractNumber(input string) (int, error) {
+	re := regexp.MustCompile(`(\d+)$`)
+	matches := re.FindStringSubmatch(input)
+	if len(matches) > 1 {
+		return strconv.Atoi(matches[1])
+	}
+	return 0, fmt.Errorf("未找到数字")
 }
 
 func (ds *DownloadService) execFfmpegCommand(pageBg, pageSub string) {

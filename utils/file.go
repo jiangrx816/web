@@ -148,3 +148,13 @@ func IsDirectory(path string) (bool, error) {
 	}
 	return info.IsDir(), nil
 }
+
+func CreateFile(fileName string) {
+	// 创建文件，使用 os.O_CREATE | os.O_WRONLY 标志
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Printf("创建文件 %s 时出错: %v\n", fileName, err)
+		return
+	}
+	defer file.Close()
+}

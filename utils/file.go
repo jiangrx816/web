@@ -136,3 +136,15 @@ func AppendToFile(fileName, text string) error {
 
 	return nil
 }
+
+// IsDirectory 判断指定的目录是否存在
+func IsDirectory(path string) (bool, error) {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return info.IsDir(), nil
+}

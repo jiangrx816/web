@@ -4,6 +4,7 @@ import (
 	"fmt"
 	rxLog "github.com/jiangrx816/gopkg/log"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,6 +19,14 @@ var counter int = 10
 var baseStep int = 0
 var step int = 1000
 var imgBaseUrl string = ""
+var dirPathRoot string = "/Users/jiang/demo/book"
+
+const maxConcurrent = 10
+
+// Result 结果结构体，用于保存文件夹和文件的内容
+type Result struct {
+	Path string
+}
 
 func (ds *DownloadService) DownloadImgList() {
 	var wg sync.WaitGroup
@@ -155,41 +164,55 @@ func (ds *DownloadService) fileUrlSaveToLog(startIndex, endIndex int) {
 	wg.Wait()
 }
 
-func (ds *DownloadService) ReadDirList() {
-	root := "/Users/jiang/demo/book"
+// FFMpegImageMergeBGToSub 将背景图与内容图进行合并成一张图片
+func (ds *DownloadService) FFMpegImageMergeBGToSub() {
+	sem := make(chan struct{}, maxConcurrent)
+	results := make(chan Result)
+	var wg sync.WaitGroup
 
-	// 遍历根目录下的所有文件夹
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+	wg.Add(1)
+	go ds.processDir(dirPathRoot, &wg, sem, results)
 
-		// 如果是目录，读取该目录下的所有文件
-		if info.IsDir() && path != root {
-			fmt.Println("Directory:", path)
-			files, err := ioutil.ReadDir(path)
-			if err != nil {
-				return err
-			}
-			for _, file := range files {
-				if !file.IsDir() {
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
 
-					filePathSource := path + "/" + file.Name()
-					contains := ds.isPageBg(filePathSource)
-					if contains {
-						newPath := ds.makePageSub(filePathSource)
-						ds.execFfmpegCommand(filePathSource, newPath)
-					}
-				}
-			}
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		fmt.Printf("Error walking the path %v: %v\n", root, err)
+	for result := range results {
+		fmt.Printf("File: %s\n", result.Path)
 	}
+}
+
+// 遍历目录并读取文件内容
+func (ds *DownloadService) processDir(dirPath string, wg *sync.WaitGroup, sem chan struct{}, results chan<- Result) {
+	defer wg.Done()
+
+	sem <- struct{}{}        // 获取一个许可
+	defer func() { <-sem }() // 释放许可
+
+	entries, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		log.Println("Error reading directory:", err)
+		return
+	}
+
+	for _, entry := range entries {
+		fullPath := filepath.Join(dirPath, entry.Name())
+		if entry.IsDir() {
+			wg.Add(1)
+			go ds.processDir(fullPath, wg, sem, results) // 递归遍历子目录
+		} else {
+			if contains := ds.isPageBg(fullPath); contains {
+				newPath := ds.makePageSub(fullPath)
+				ds.execFfmpegCommand(fullPath, newPath)
+			}
+			results <- Result{Path: fullPath}
+		}
+	}
+}
+
+func (ds *DownloadService) FFMpegImageToVideo() {
+
 }
 
 func (ds *DownloadService) execFfmpegCommand(pageBg, pageSub string) {
@@ -251,8 +274,7 @@ func (ds *DownloadService) makePageSub(imgPath string) (newPath string) {
 }
 
 func (ds *DownloadService) GetFileCount() {
-	root := "/Users/jiang/demo/book"
-	countFilesInSubdirectories(root)
+	countFilesInSubdirectories(dirPathRoot)
 }
 
 func countFilesInSubdirectories(root string) {

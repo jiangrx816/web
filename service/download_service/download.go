@@ -213,7 +213,7 @@ func (ds *DownloadService) processDir(dirPath string, wg *sync.WaitGroup, sem ch
 }
 
 func (ds *DownloadService) ExecSh() {
-	rootDir := "/Users/jiang/demo/shell/items"
+	rootDir := "/Users/jiang/demo/shell/items/23"
 	numWorkers := 10
 
 	// 创建一个 channel 用于传递 shell 脚本路径
@@ -255,6 +255,16 @@ func (ds *DownloadService) ExecSh() {
 	// 等待所有 goroutines 完成
 	wg.Wait()
 	fmt.Println("所有脚本执行完成。")
+
+	deleteFolder(rootDir)
+}
+
+func deleteFolder(path string) error {
+	err := os.RemoveAll(path)
+	if err != nil {
+		return fmt.Errorf("failed to delete folder %s: %w", path, err)
+	}
+	return nil
 }
 
 // executeShellScript 执行 shell 脚本文件

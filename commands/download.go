@@ -18,7 +18,13 @@ func Download() *cli.Command {
 			//downloadService.FFMpegImageToVideo()
 
 			//执行顺序的sh
-			downloadService.ExecSh()
+			//downloadService.ExecSh()
+
+			//将需要合并的视频写入文件
+			//downloadService.WriteFileVideo()
+
+			//将多个视频合并成一个完整的视频
+			downloadService.MakeVideoShell()
 			return nil
 		},
 	}

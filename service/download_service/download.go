@@ -213,50 +213,54 @@ func (ds *DownloadService) processDir(dirPath string, wg *sync.WaitGroup, sem ch
 }
 
 func (ds *DownloadService) ExecSh() {
-	rootDir := "/Users/jiang/demo/shell/items/23"
-	numWorkers := 10
+	items := []string{"1"}
+	for idx, _ := range items {
 
-	// 创建一个 channel 用于传递 shell 脚本路径
-	scriptChan := make(chan string, numWorkers)
-	var wg sync.WaitGroup
+		rootDir := "/Users/jiang/demo/shell/items/" + items[idx]
+		numWorkers := 10
 
-	// 启动工作 goroutines
-	for i := 0; i < numWorkers; i++ {
-		wg.Add(1)
-		go func(id int) {
-			defer wg.Done()
-			for scriptPath := range scriptChan {
-				fmt.Printf("worker %d: 执行脚本 %s\n", id, scriptPath)
-				if err := executeShellScript(scriptPath); err != nil {
-					fmt.Printf("worker %d: 执行脚本 %s 时出错: %v\n", id, scriptPath, err)
+		// 创建一个 channel 用于传递 shell 脚本路径
+		scriptChan := make(chan string, numWorkers)
+		var wg sync.WaitGroup
+
+		// 启动工作 goroutines
+		for i := 0; i < numWorkers; i++ {
+			wg.Add(1)
+			go func(id int) {
+				defer wg.Done()
+				for scriptPath := range scriptChan {
+					fmt.Printf("worker %d: 执行脚本 %s\n", id, scriptPath)
+					if err := executeShellScript(scriptPath); err != nil {
+						fmt.Printf("worker %d: 执行脚本 %s 时出错: %v\n", id, scriptPath, err)
+					}
 				}
-			}
-		}(i)
-	}
-
-	// 遍历根目录并发送脚本路径到 channel
-	go func() {
-		defer close(scriptChan)
-		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				fmt.Printf("访问文件 %s 时出错: %v\n", path, err)
-				return err
-			}
-			if !info.IsDir() && filepath.Ext(path) == ".sh" {
-				scriptChan <- path
-			}
-			return nil
-		})
-		if err != nil {
-			fmt.Printf("遍历路径 %s 时出错: %v\n", rootDir, err)
+			}(i)
 		}
-	}()
 
-	// 等待所有 goroutines 完成
-	wg.Wait()
-	fmt.Println("所有脚本执行完成。")
+		// 遍历根目录并发送脚本路径到 channel
+		go func() {
+			defer close(scriptChan)
+			err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					fmt.Printf("访问文件 %s 时出错: %v\n", path, err)
+					return err
+				}
+				if !info.IsDir() && filepath.Ext(path) == ".sh" {
+					scriptChan <- path
+				}
+				return nil
+			})
+			if err != nil {
+				fmt.Printf("遍历路径 %s 时出错: %v\n", rootDir, err)
+			}
+		}()
 
-	deleteFolder(rootDir)
+		// 等待所有 goroutines 完成
+		wg.Wait()
+		fmt.Println("所有脚本执行完成。")
+
+		deleteFolder(rootDir)
+	}
 }
 
 func deleteFolder(path string) error {
@@ -558,4 +562,88 @@ func copyFile(src, dst string) error {
 	}
 
 	return nil
+}
+
+func (ds *DownloadService) WriteFileVideo() {
+	rootDir := "/Users/jiang/demo/book1"
+	numWorkers := 10
+
+	// 创建一个 channel 用于传递目录路径
+	dirChan := make(chan string, numWorkers)
+	var wg sync.WaitGroup
+
+	// 启动工作 goroutines
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			for dirPath := range dirChan {
+				fileCount := countFilesInDir(dirPath, id)
+				//fmt.Printf("worker %d: directory %s, file count: %d\n", id, dirPath, fileCount/3)
+				for ii := 1; ii <= fileCount/3; ii++ {
+					if number, _ := extractNumber(dirPath); number > 0 {
+						fileP := "/Users/jiang/demo/shell/items/" + strconv.Itoa(number) + ".txt"
+						utils.CreateFile(fileP)
+						ffm := `file '` + dirPath + `/` + strconv.Itoa(ii) + `.mp4'`
+						utils.AppendToFile(fileP, ffm)
+					}
+				}
+			}
+		}(i)
+	}
+
+	// 遍历根目录并发送子目录路径到 channel
+	go func() {
+		defer close(dirChan)
+		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				fmt.Printf("访问文件 %s 时出错: %v\n", path, err)
+				return err
+			}
+			if info.IsDir() && path != rootDir {
+				dirChan <- path
+			}
+			return nil
+		})
+		if err != nil {
+			fmt.Printf("遍历路径 %s 时出错: %v\n", rootDir, err)
+		}
+	}()
+
+	// 等待所有 goroutines 完成
+	wg.Wait()
+	fmt.Println("所有目录处理完成。")
+}
+
+func (ds *DownloadService) MakeVideoShell() {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go walkDirVideoShell("/Users/jiang/demo/shell/items", &wg)
+
+	wg.Wait()
+	fmt.Println("All files have been finished.")
+}
+
+func walkDirVideoShell(dir string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by returning filepath.WalkErr: %v\n", err)
+			return err
+		}
+		if !info.IsDir() && filepath.Ext(path) == ".txt" {
+			// 定义正则表达式，匹配数字
+			re := regexp.MustCompile(`\d+`)
+			// 查找字符串中的第一个数字
+			number := re.FindString(path)
+			fileP := "/Users/jiang/demo/shell/shell.sh"
+			ffm := `ffmpeg -f concat -safe 0 -i ` + path + ` -c copy /Users/jiang/demo/mp4/` + number + `.mp4`
+			utils.AppendToFile(fileP, ffm)
+		}
+		return nil
+	})
+	if err != nil {
+		fmt.Printf("error walking the path: %v\n", err)
+	}
 }

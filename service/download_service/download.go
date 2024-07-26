@@ -698,12 +698,57 @@ func (ds *DownloadService) InsertData() {
 	fmt.Println("所有目录处理完成。")
 }
 
-func (ds *DownloadService) UpdateData() {
-	var list []picture.ChineseBookTemp
-	model.DefaultPicture().Model(&picture.ChineseBookTemp{}).Debug().Find(&list)
-	for idx, _ := range list {
-		var temp picture.ChineseBookTemp
-		temp.Icon = "https://oss.58haha.com/chinese_book/cover/" + strconv.Itoa(list[idx].Id) + ".jpg"
-		model.DefaultPicture().Model(&picture.ChineseBookTemp{}).Debug().Where("id = ?", list[idx].Id).Updates(&temp)
+func (ds *DownloadService) DeleteMp4Data() {
+	rootDir := "/Users/jiang/demo/book1"
+	numWorkers := 10
+
+	// 创建一个 channel 用于传递目录路径
+	dirChan := make(chan string, numWorkers)
+	var wg sync.WaitGroup
+
+	// 启动工作 goroutines
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			for dirPath := range dirChan {
+				filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+					if err != nil {
+						fmt.Printf("prevent panic by returning filepath.WalkErr: %v\n", err)
+						return err
+					}
+					if !info.IsDir() && filepath.Ext(path) == ".mp4" {
+						fmt.Println("Deleting:", path)
+						err = os.Remove(path)
+						if err != nil {
+							return err
+						}
+					}
+					return nil
+				})
+			}
+		}(i)
 	}
+
+	// 遍历根目录并发送子目录路径到 channel
+	go func() {
+		defer close(dirChan)
+		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				fmt.Printf("访问文件 %s 时出错: %v\n", path, err)
+				return err
+			}
+			if info.IsDir() && path != rootDir {
+				dirChan <- path
+			}
+			return nil
+		})
+		if err != nil {
+			fmt.Printf("遍历路径 %s 时出错: %v\n", rootDir, err)
+		}
+	}()
+
+	// 等待所有 goroutines 完成
+	wg.Wait()
+	fmt.Println("所有目录处理完成。")
 }

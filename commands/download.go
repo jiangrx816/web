@@ -26,8 +26,8 @@ func Download() *cli.Command {
 			//将多个视频合并成一个完整的视频
 			//downloadService.MakeVideoShell()
 
-			//将数据写入到数据库
-			downloadService.InsertData()
+			//删除对应的mp4文件
+			downloadService.DeleteMp4Data()
 
 			return nil
 		},

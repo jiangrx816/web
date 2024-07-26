@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
 	"github.com/jiangrx816/gopkg/utils"
@@ -82,12 +80,6 @@ func FormatSliceUintString(idS []uint) (str string) {
 	}
 	str = strings.Join(strS, ",")
 	return
-}
-
-func MD5String(str string) string {
-	h := md5.New()
-	h.Write([]byte(str))
-	return hex.EncodeToString(h.Sum(nil))
 }
 
 // Contains 判断切片是否存在元素

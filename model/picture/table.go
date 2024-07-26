@@ -63,3 +63,30 @@ type AlbumPictureInfo struct {
 func (AlbumPictureInfo) TableName() string {
 	return "s_album_picture_info"
 }
+
+type ChineseBookTemp struct {
+	Id        int    `json:"-"`
+	BookId    string `json:"book_id"`
+	BookIdOld int    `json:"book_id_old"`
+	Title     string `json:"title"`
+	Icon      string `json:"icon"`
+	Type      int8   `json:"type"`
+	Position  uint8  `json:"position"`
+}
+
+func (ChineseBookTemp) TableName() string {
+	return "s_chinese_picture_temp"
+}
+
+type ChineseBookInfoTemp struct {
+	Id        int    `json:"id"`
+	BookId    string `json:"book_id"`
+	BookIdOld int    `json:"book_id_old"`
+	Mp3       string `json:"mp3"`
+	Pic       string `json:"pic"`
+	Position  int    `json:"position"`
+}
+
+func (ChineseBookInfoTemp) TableName() string {
+	return "s_chinese_picture_info_temp"
+}

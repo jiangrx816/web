@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"web/model"
+	"web/model/picture"
 	"web/utils"
 )
 
@@ -645,5 +647,63 @@ func walkDirVideoShell(dir string, wg *sync.WaitGroup) {
 	})
 	if err != nil {
 		fmt.Printf("error walking the path: %v\n", err)
+	}
+}
+
+func (ds *DownloadService) InsertData() {
+	rootDir := "/Users/jiang/demo/book1"
+	numWorkers := 10
+
+	// 创建一个 channel 用于传递目录路径
+	dirChan := make(chan string, numWorkers)
+	var wg sync.WaitGroup
+
+	// 启动工作 goroutines
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			for dirPath := range dirChan {
+				number, _ := extractNumber(dirPath)
+				bookId := utils.MD5String(strconv.Itoa(number))
+				var temp picture.ChineseBookTemp
+				temp.BookId = bookId
+				temp.BookIdOld = number
+				temp.Type = -1
+				model.DefaultPicture().Model(&picture.ChineseBookTemp{}).Debug().Create(&temp)
+			}
+		}(i)
+	}
+
+	// 遍历根目录并发送子目录路径到 channel
+	go func() {
+		defer close(dirChan)
+		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				fmt.Printf("访问文件 %s 时出错: %v\n", path, err)
+				return err
+			}
+			if info.IsDir() && path != rootDir {
+				dirChan <- path
+			}
+			return nil
+		})
+		if err != nil {
+			fmt.Printf("遍历路径 %s 时出错: %v\n", rootDir, err)
+		}
+	}()
+
+	// 等待所有 goroutines 完成
+	wg.Wait()
+	fmt.Println("所有目录处理完成。")
+}
+
+func (ds *DownloadService) UpdateData() {
+	var list []picture.ChineseBookTemp
+	model.DefaultPicture().Model(&picture.ChineseBookTemp{}).Debug().Find(&list)
+	for idx, _ := range list {
+		var temp picture.ChineseBookTemp
+		temp.Icon = "https://oss.58haha.com/chinese_book/cover/" + strconv.Itoa(list[idx].Id) + ".jpg"
+		model.DefaultPicture().Model(&picture.ChineseBookTemp{}).Debug().Where("id = ?", list[idx].Id).Updates(&temp)
 	}
 }

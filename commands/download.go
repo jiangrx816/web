@@ -24,7 +24,11 @@ func Download() *cli.Command {
 			//downloadService.WriteFileVideo()
 
 			//将多个视频合并成一个完整的视频
-			downloadService.MakeVideoShell()
+			//downloadService.MakeVideoShell()
+
+			//将数据写入到数据库
+			downloadService.InsertData()
+
 			return nil
 		},
 	}

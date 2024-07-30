@@ -3,14 +3,11 @@ package main
 import (
 	rxMysql "github.com/jiangrx816/gopkg/db"
 	rxLog "github.com/jiangrx816/gopkg/log"
-	rxRedis "github.com/jiangrx816/gopkg/redis"
 	"github.com/jiangrx816/gopkg/utils"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"os"
-	"web/cache"
 	"web/commands"
-	"web/cron"
 )
 
 var configFile string
@@ -45,14 +42,14 @@ func initConfig(*cli.Context) error {
 	if err := rxMysql.InitMysqlDB(); err != nil {
 		return err
 	}
-	if err := rxRedis.InitFromViperDefault(); err != nil {
-		return err
-	}
-	if err := cache.HttpCache(); err != nil {
-		return err
-	}
-	if err := cron.DoCron(); err != nil {
-		return err
-	}
+	//if err := rxRedis.InitFromViperDefault(); err != nil {
+	//	return err
+	//}
+	//if err := cache.HttpCache(); err != nil {
+	//	return err
+	//}
+	//if err := cron.DoCron(); err != nil {
+	//	return err
+	//}
 	return nil
 }

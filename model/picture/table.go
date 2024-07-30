@@ -17,7 +17,8 @@ type ChineseBook struct {
 	BookId   string `json:"book_id"`
 	Title    string `json:"title"`
 	Icon     string `json:"icon"`
-	Type     uint8  `json:"type"`
+	Icon_1   string `json:"icon_1"`
+	Type     int8   `json:"type"`
 	Position uint8  `json:"position"`
 }
 

@@ -27,7 +27,7 @@ func Download() *cli.Command {
 			//downloadService.MakeVideoShell()
 
 			//删除对应的mp4文件
-			downloadService.DownloadImageList()
+			downloadService.DeleteMp4Data()
 
 			return nil
 		},

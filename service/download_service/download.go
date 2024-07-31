@@ -699,7 +699,7 @@ func (ds *DownloadService) InsertData() {
 }
 
 func (ds *DownloadService) DeleteMp4Data() {
-	rootDir := "/Users/jiang/demo/book1"
+	rootDir := "/Users/jiang/demo/cover"
 	numWorkers := 10
 
 	// 创建一个 channel 用于传递目录路径

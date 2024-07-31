@@ -4,11 +4,15 @@ import (
 	"github.com/chenyahui/gin-cache/persist"
 	rxRedis "github.com/jiangrx816/gopkg/redis"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"log"
 	"web/common"
 )
 
 func HttpCache() error {
+	if !viper.GetBool("http.switch") {
+		return nil
+	}
 	//判断redis是连接成功
 	if rxRedis.ClientDefault("web") == nil {
 		log.Printf("%+v", "redis server not connect, http-cache failed.")

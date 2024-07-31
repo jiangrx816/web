@@ -1,6 +1,7 @@
 app: web
 debug: true
 db:
+  switch: false
   picture:
     dialect: mysql
     dsn: root:123456@tcp(127.0.0.1:3306)/picture?charset=utf8mb4&parseTime=True&loc=Local
@@ -8,6 +9,7 @@ db:
     dialect: mysql
     dsn: root:123456@tcp(127.0.0.1:3306)/poetry?charset=utf8mb4&parseTime=True&loc=Local
 redis:
+  switch: false
   clients:
     web:
       addrs:
@@ -21,6 +23,7 @@ log:
     - stdout
     - ./logs/api.log
 elasticsearch:
+  switch: false
   engine:
     chinese_indices: chinese.book.student.alias
     addresses:
@@ -28,12 +31,15 @@ elasticsearch:
     username: admin
     password: 123456
 rabbitmq:
+  switch: false
   engine:
     addresses: localhost:5672/
     username: myuser
     password: mypass
     queue-name: order
 cron:
+  switch: false
+http:
   switch: false
 wechat:
   appid: "****"

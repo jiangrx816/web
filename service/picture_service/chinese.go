@@ -72,7 +72,7 @@ func (ps *PictureService) FindChineseBookInfo(bookId string) (response pictureRe
 
 func (ps *PictureService) FindSearchChineseBookList(page int, value string) (response pictureResp.ChineseBookResponse, apiErr api.Error) {
 	utils.DefaultIntOne(&page)
-	size := common.DEFAULT_PAGE_SIZE
+	size := 100
 	offset := size * (page - 1)
 
 	var bookList []picture.ChineseBook

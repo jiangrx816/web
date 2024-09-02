@@ -21,14 +21,95 @@ import (
 var counter int = 10
 var baseStep int = 0
 var step int = 1000
-var imgBaseUrl string = ""
-var dirPathRoot string = "/Users/jiang/demo/book"
+var imgBaseUrl string = "https://qqavcdn.qiuqiuhuiben.com/cbook/"
+var dirPathRoot string = "/Users/jiang/demo/book1"
 
 const maxConcurrent = 10
 
 // Result 结果结构体，用于保存文件夹和文件的内容
 type Result struct {
 	Path string
+}
+
+func (ds *DownloadService) DownloadImgListByIds() {
+	bookIds := []int{1004, 1005, 1006, 1007, 1010, 1013, 1014, 1015, 1016, 1017, 1530, 1535, 10081, 10221, 10229, 102, 10246, 10258, 10263, 10265, 10400, 10402, 10407, 10514, 10595, 10641, 10643, 10677, 10717, 10719, 10720, 10721, 10722, 10727, 10728, 10729, 10734, 10739, 10743, 10746, 10748, 10749, 10766, 10768, 10769, 10770, 10771, 11001, 11007, 11011, 11014, 11015, 11107, 11403, 11489, 11657, 12033, 13065, 20091, 20092, 20093, 20098, 20125, 20909, 20910, 20911, 20912, 20913, 20914, 20937, 20938, 20939, 20940, 20982, 20998, 21133, 21134, 21135, 21195, 21196, 21198, 21199, 10290, 11642, 13206, 20999, 20097, 20287, 20297, 20908, 20936, 21200, 10076, 10080, 10082, 10222, 10223, 10224, 10281, 10282, 10283, 10285, 10286, 10287, 10288, 10289, 10291, 10292, 10293, 10329, 10331, 10333, 10336, 10339, 10343, 10346, 10349, 10352, 10354, 10355, 10357, 10358, 10359, 10360, 10362, 10364, 10365, 10366, 10367, 10368, 10369, 10370, 10371, 10372, 10374, 10375, 10376, 10377, 10378, 10379, 10435, 10441, 10442, 10448, 10454, 10456, 10486, 10508, 10509, 10510, 10560, 10607, 10608, 10611, 10615, 10617, 10620, 10622, 10624, 10627, 10633, 10635, 10639, 10720, 10763, 10764, 10765, 11354, 11422, 11423, 11424, 11425, 11426, 11427, 11428, 11429, 11430, 11431, 11432, 11433, 11434, 11435, 11436, 11437, 11438, 11439, 11440, 11441, 11442, 11443, 11444, 11445, 11446, 11447, 11448, 11449, 11450, 11451, 11452, 11453, 11454, 11455, 11456, 11457, 11458, 11459, 11460, 11461, 11462, 11463, 11465, 20093, 10356, 10433, 10565, 11746, 20915, 13464, 20100}
+
+	const workerCount = 20
+	taskChan := make(chan int, len(bookIds))
+	var wg sync.WaitGroup
+
+	// Start worker goroutines
+	for i := 0; i < workerCount; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for idx := range taskChan {
+				bookIdStr := strconv.Itoa(bookIds[idx])
+				existDir := "/Users/jiang/demo/book/" + bookIdStr
+				directory, err := utils.IsDirectory(existDir)
+				if err != nil {
+					fmt.Printf("Error checking directory: %v\n", err)
+					continue
+				}
+				if directory {
+					fmt.Printf("existDir: %v 存在\n", existDir)
+					continue
+				}
+
+				imgPath := imgBaseUrl + bookIdStr
+				for i := 1; i <= 30; i++ {
+					filePathBg := imgPath + "/extract/page_bg_" + strconv.Itoa(i) + ".jpg"
+					if exists := utils.UrlExists(filePathBg); !exists {
+						continue
+					}
+					filePath := imgPath + "/extract/page_sub_" + strconv.Itoa(i) + ".png"
+					mp3Path := imgPath + "/extract/page_audio_" + strconv.Itoa(i) + ".mp3"
+
+					ds.downloadFileContent(filePathBg, filePath, mp3Path)
+				}
+			}
+		}()
+	}
+
+	// Send tasks to the channel
+	for idx := range bookIds {
+		taskChan <- idx
+	}
+
+	// Close the channel to signal workers to stop
+	close(taskChan)
+
+	// Wait for all workers to finish
+	wg.Wait()
+}
+
+func (ds *DownloadService) DownloadImgListByIds1() {
+	bookIds := []int{1004, 1005, 1006, 1007, 1010, 1013, 1014, 1015, 1016, 1017, 1530, 1535, 10081, 10221, 10229, 102, 10246, 10258, 10263, 10265, 10400, 10402, 10407, 10514, 10595, 10641, 10643, 10677, 10717, 10719, 10720, 10721, 10722, 10727, 10728, 10729, 10734, 10739, 10743, 10746, 10748, 10749, 10766, 10768, 10769, 10770, 10771, 11001, 11007, 11011, 11014, 11015, 11107, 11403, 11489, 11657, 12033, 13065, 20091, 20092, 20093, 20098, 20125, 20909, 20910, 20911, 20912, 20913, 20914, 20937, 20938, 20939, 20940, 20982, 20998, 21133, 21134, 21135, 21195, 21196, 21198, 21199, 10290, 11642, 13206, 20999, 20097, 20287, 20297, 20908, 20936, 21200, 10076, 10080, 10082, 10222, 10223, 10224, 10281, 10282, 10283, 10285, 10286, 10287, 10288, 10289, 10291, 10292, 10293, 10329, 10331, 10333, 10336, 10339, 10343, 10346, 10349, 10352, 10354, 10355, 10357, 10358, 10359, 10360, 10362, 10364, 10365, 10366, 10367, 10368, 10369, 10370, 10371, 10372, 10374, 10375, 10376, 10377, 10378, 10379, 10435, 10441, 10442, 10448, 10454, 10456, 10486, 10508, 10509, 10510, 10560, 10607, 10608, 10611, 10615, 10617, 10620, 10622, 10624, 10627, 10633, 10635, 10639, 10720, 10763, 10764, 10765, 11354, 11422, 11423, 11424, 11425, 11426, 11427, 11428, 11429, 11430, 11431, 11432, 11433, 11434, 11435, 11436, 11437, 11438, 11439, 11440, 11441, 11442, 11443, 11444, 11445, 11446, 11447, 11448, 11449, 11450, 11451, 11452, 11453, 11454, 11455, 11456, 11457, 11458, 11459, 11460, 11461, 11462, 11463, 11465, 20093, 10356, 10433, 10565, 11746, 20915, 13464, 20100}
+	for idx, _ := range bookIds {
+		bookIdStr := strconv.Itoa(bookIds[idx])
+		existDir := "/Users/jiang/demo/book/" + bookIdStr
+		directory, err := utils.IsDirectory(existDir)
+		if err != nil {
+			fmt.Printf("Error checking directory: %v\n", err)
+			continue
+		}
+		if directory {
+			fmt.Printf("existDir: %v 存在\n", existDir)
+			continue
+		}
+
+		imgPath := imgBaseUrl + bookIdStr
+		for i := 1; i <= 30; i++ {
+			filePathBg := imgPath + "/extract/page_bg_" + strconv.Itoa(i) + ".jpg"
+			if exists := utils.UrlExists(filePathBg); !exists {
+				continue
+			}
+			filePath := imgPath + "/extract/page_sub_" + strconv.Itoa(i) + ".png"
+			mp3Path := imgPath + "/extract/page_audio_" + strconv.Itoa(i) + ".mp3"
+
+			ds.downloadFileContent(filePathBg, filePath, mp3Path)
+		}
+	}
 }
 
 func (ds *DownloadService) DownloadImgList() {
@@ -207,18 +288,278 @@ func (ds *DownloadService) processDir(dirPath string, wg *sync.WaitGroup, sem ch
 		} else {
 			if contains := ds.isPageBg(fullPath); contains {
 				newPath := ds.makePageSub(fullPath)
+				os.Remove(fullPath)
+				os.Remove(newPath)
 				ds.execFfmpegCommand(fullPath, newPath)
 			}
 			results <- Result{Path: fullPath}
 		}
 	}
 }
-
 func (ds *DownloadService) ExecSh() {
-	items := []string{"1"}
-	for idx, _ := range items {
+	// 指定目录
+	dir := "/Users/jiang/demo/shell/items/"
 
-		rootDir := "/Users/jiang/demo/shell/items/" + items[idx]
+	// 读取目录中的文件
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		fmt.Println("读取目录失败:", err)
+		return
+	}
+
+	var wg sync.WaitGroup
+	fileChan := make(chan string, len(files))
+
+	// 将所有 .sh 文件添加到通道
+	for _, file := range files {
+		if filepath.Ext(file.Name()) == ".sh" {
+			fileChan <- filepath.Join(dir, file.Name())
+		}
+	}
+	close(fileChan)
+
+	// 开启10个goroutine并发执行
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for file := range fileChan {
+				fmt.Printf("正在执行 %s\n", file)
+				cmd := exec.Command("sh", file)
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				if err := cmd.Run(); err != nil {
+					fmt.Printf("执行 %s 失败: %v\n", file, err)
+				}
+			}
+		}()
+	}
+
+	wg.Wait()
+	fmt.Println("所有脚本执行完毕")
+}
+func (ds *DownloadService) ExecSh1() {
+	items := []int{241004,
+		241005,
+		241006,
+		241007,
+		241010,
+		241013,
+		241014,
+		241015,
+		241016,
+		241017,
+		241530,
+		241535,
+		2410081,
+		2410221,
+		2410229,
+		2410242,
+		2410246,
+		2410258,
+		2410263,
+		2410265,
+		2410400,
+		2410402,
+		2410407,
+		2410514,
+		2410595,
+		2410641,
+		2410643,
+		2410677,
+		2410717,
+		2410719,
+		2410720,
+		2410721,
+		2410722,
+		2410727,
+		2410728,
+		2410729,
+		2410734,
+		2410739,
+		2410743,
+		2410746,
+		2410748,
+		2410749,
+		2410766,
+		2410768,
+		2410769,
+		2410770,
+		2410771,
+		2411001,
+		2411007,
+		2411011,
+		2411014,
+		2411015,
+		2411107,
+		2411403,
+		2411489,
+		2411657,
+		2412033,
+		2413065,
+		2420091,
+		2420092,
+		2420093,
+		2420098,
+		2420125,
+		2420909,
+		2420910,
+		2420911,
+		2420912,
+		2420913,
+		2420914,
+		2420937,
+		2420938,
+		2420939,
+		2420940,
+		2420982,
+		2420998,
+		2421133,
+		2421134,
+		2421135,
+		2421195,
+		2421196,
+		2421198,
+		2421199,
+		2410290,
+		2411642,
+		2413206,
+		2420999,
+		2420097,
+		2420287,
+		2420297,
+		2420908,
+		2420936,
+		2421200,
+		2410076,
+		2410080,
+		2410082,
+		2410222,
+		2410223,
+		2410224,
+		2410281,
+		2410282,
+		2410283,
+		2410285,
+		2410286,
+		2410287,
+		2410288,
+		2410289,
+		2410291,
+		2410292,
+		2410293,
+		2410329,
+		2410331,
+		2410333,
+		2410336,
+		2410339,
+		2410343,
+		2410346,
+		2410349,
+		2410352,
+		2410354,
+		2410355,
+		2410357,
+		2410358,
+		2410359,
+		2410360,
+		2410362,
+		2410364,
+		2410365,
+		2410366,
+		2410367,
+		2410368,
+		2410369,
+		2410370,
+		2410371,
+		2410372,
+		2410374,
+		2410375,
+		2410376,
+		2410377,
+		2410378,
+		2410379,
+		2410435,
+		2410441,
+		2410442,
+		2410448,
+		2410454,
+		2410456,
+		2410486,
+		2410508,
+		2410509,
+		2410510,
+		2410560,
+		2410607,
+		2410608,
+		2410611,
+		2410615,
+		2410617,
+		2410620,
+		2410622,
+		2410624,
+		2410627,
+		2410633,
+		2410635,
+		2410639,
+		2410720,
+		2410763,
+		2410764,
+		2410765,
+		2411354,
+		2411422,
+		2411423,
+		2411424,
+		2411425,
+		2411426,
+		2411427,
+		2411428,
+		2411429,
+		2411430,
+		2411431,
+		2411432,
+		2411433,
+		2411434,
+		2411435,
+		2411436,
+		2411437,
+		2411438,
+		2411439,
+		2411440,
+		2411441,
+		2411442,
+		2411443,
+		2411444,
+		2411445,
+		2411446,
+		2411447,
+		2411448,
+		2411449,
+		2411450,
+		2411451,
+		2411452,
+		2411453,
+		2411454,
+		2411455,
+		2411456,
+		2411457,
+		2411458,
+		2411459,
+		2411460,
+		2411461,
+		2411462,
+		2411463,
+		2411465,
+		2420093,
+		2410356,
+		2410433,
+		2410565,
+		2411746,
+		2420915,
+		2413464,
+		2420100}
+	for idx, _ := range items {
+		rootDir := "/Users/jiang/demo/shell/items/" + strconv.Itoa(items[idx])
 		numWorkers := 10
 
 		// 创建一个 channel 用于传递 shell 脚本路径
@@ -283,7 +624,7 @@ func executeShellScript(filePath string) error {
 
 func (ds *DownloadService) FFMpegImageToVideo() {
 	//ffmpeg  -thread_queue_size 96   -loop 1   -t  2  -y -r 1 -i  /Users/jiang/demo/book1/8610011/2.jpg   -i   /Users/jiang/demo/book1/8610011/page_audio_2.mp3  -x264-params keyint=1:scenecut=0  -vf "scale=2800:-2"   -absf aac_adtstoasc -s 1280x720 -c:v libx264 -pix_fmt yuv420p   /Users/jiang/demo/mp4/8610011-4.mp4  2>&1
-	rootDir := "/Users/jiang/demo/book1"
+	rootDir := "/Users/jiang/demo/book"
 	numWorkers := 10
 
 	// 创建一个 channel 用于传递目录路径
@@ -299,11 +640,11 @@ func (ds *DownloadService) FFMpegImageToVideo() {
 				fileCount := countFilesInDir(dirPath, id)
 				fmt.Printf("worker %d: directory %s, file count: %d\n", id, dirPath, fileCount/2)
 
-				for ii := 1; ii <= fileCount/2; ii++ {
+				for ii := 1; ii <= fileCount/4; ii++ {
 					if number, _ := extractNumber(dirPath); number > 0 {
 						fileP := "/Users/jiang/demo/shell/" + strconv.Itoa(number) + ".sh"
 						utils.CreateFile(fileP)
-						ffm := `ffmpeg  -thread_queue_size 96   -loop 1   -t  2  -y -r 1 -i  ` + dirPath + `/` + strconv.Itoa(ii) + `.jpg   -i ` + dirPath + `/page_audio_` + strconv.Itoa(ii) + `.mp3  -x264-params keyint=1:scenecut=0  -vf "scale=2800:-2"   -absf aac_adtstoasc -s 1280x720 -c:v libx264 -pix_fmt yuv420p   ` + dirPath + `/` + strconv.Itoa(ii) + `.mp4  2>&1`
+						ffm := `ffmpeg  -thread_queue_size 96   -loop 1   -t  2  -y -r 1 -i  ` + dirPath + `/` + strconv.Itoa(ii) + `.jpg   -i ` + dirPath + `/` + strconv.Itoa(ii) + `.mp3  -x264-params keyint=1:scenecut=0  -vf "scale=2800:-2"   -absf aac_adtstoasc -s 1280x720 -c:v libx264 -pix_fmt yuv420p   ` + dirPath + `/` + strconv.Itoa(ii) + `.mp4  2>&1`
 						utils.AppendToFile(fileP, ffm)
 					}
 				}
@@ -492,11 +833,33 @@ func walkDir(dir string, copyFile func(string, string) error, wg *sync.WaitGroup
 			return err
 		}
 		if !info.IsDir() && filepath.Ext(path) == ".jpg" {
-			if match, _ := regexp.MatchString(`/\d+\.jpg$`, path); match {
-				matches := regexp.MustCompile(`/(\d+)/\d+\.jpg$`).FindStringSubmatch(path)
+			//if match, _ := regexp.MatchString(`/\d+\.jpg$`, path); match {
+			if match, _ := regexp.MatchString(`page_bg_\d+\.jpg$`, path); match {
+				matches := regexp.MustCompile(`/(\d+)/page_bg_\d+\.jpg$`).FindStringSubmatch(path)
 				if len(matches) > 1 {
 					//matchList := regexp.MustCompile(`/\d+\.jpg$`).FindStringSubmatch(path)
-					newPath := "/Users/jiang/demo/book1/86" + matches[1]
+					newPath := "/Users/jiang/demo/book1/24" + matches[1]
+					destinationFile := filepath.Join(newPath, filepath.Base(path))
+					// 创建目标目录（如果不存在）
+					err := os.MkdirAll(newPath, os.ModePerm)
+					if err != nil {
+						fmt.Println("创建目录失败:", err)
+					}
+
+					if err := copyFile(path, destinationFile); err != nil {
+						fmt.Printf("failed to move file: %v\n", err)
+					}
+				}
+			}
+		}
+
+		if !info.IsDir() && filepath.Ext(path) == ".png" {
+			//if match, _ := regexp.MatchString(`/\d+\.jpg$`, path); match {
+			if match, _ := regexp.MatchString(`page_sub_\d+\.png$`, path); match {
+				matches := regexp.MustCompile(`/(\d+)/page_sub_\d+\.png$`).FindStringSubmatch(path)
+				if len(matches) > 1 {
+					//matchList := regexp.MustCompile(`/\d+\.jpg$`).FindStringSubmatch(path)
+					newPath := "/Users/jiang/demo/book1/24" + matches[1]
 					destinationFile := filepath.Join(newPath, filepath.Base(path))
 					// 创建目标目录（如果不存在）
 					err := os.MkdirAll(newPath, os.ModePerm)
@@ -516,7 +879,7 @@ func walkDir(dir string, copyFile func(string, string) error, wg *sync.WaitGroup
 				matches := regexp.MustCompile(`/(\d+)/page_audio_\d+\.mp3$`).FindStringSubmatch(path)
 				if len(matches) > 1 {
 					//matchList := regexp.MustCompile(`/page_audio_\d+\.mp3$`).FindStringSubmatch(path)
-					newPath := "/Users/jiang/demo/book1/86" + matches[1]
+					newPath := "/Users/jiang/demo/book1/24" + matches[1]
 					destinationFile := filepath.Join(newPath, filepath.Base(path))
 					// 创建目标目录（如果不存在）
 					err := os.MkdirAll(newPath, os.ModePerm)
@@ -567,7 +930,7 @@ func copyFile(src, dst string) error {
 }
 
 func (ds *DownloadService) WriteFileVideo() {
-	rootDir := "/Users/jiang/demo/book1"
+	rootDir := "/Users/jiang/demo/book"
 	numWorkers := 10
 
 	// 创建一个 channel 用于传递目录路径

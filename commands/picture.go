@@ -13,7 +13,7 @@ func Picture() *cli.Command {
 		Action: func(c *cli.Context) error {
 			var pictureService picture_service.PictureService
 			fmt.Println(1111)
-			pictureService.UpdateChinesePictureCover()
+			pictureService.InsertChinesePictureCover()
 
 			return nil
 		},

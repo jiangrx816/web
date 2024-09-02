@@ -13,13 +13,14 @@ func (ChineseBookNavName) TableName() string {
 }
 
 type ChineseBook struct {
-	Id       int    `json:"-"`
-	BookId   string `json:"book_id"`
-	Title    string `json:"title"`
-	Icon     string `json:"icon"`
-	Icon_1   string `json:"icon_1"`
-	Type     int8   `json:"type"`
-	Position uint8  `json:"position"`
+	Id        int    `json:"-"`
+	BookId    string `json:"book_id"`
+	BookIdOld int    `json:"book_id_old"`
+	Title     string `json:"title"`
+	Icon      string `json:"icon"`
+	Icon_1    string `json:"icon_1"`
+	Type      int8   `json:"type"`
+	Position  uint8  `json:"position"`
 }
 
 func (ChineseBook) TableName() string {
@@ -27,11 +28,12 @@ func (ChineseBook) TableName() string {
 }
 
 type ChineseBookInfo struct {
-	Id       int    `json:"id"`
-	BookId   string `json:"book_id"`
-	Mp3      string `json:"mp3"`
-	Pic      string `json:"pic"`
-	Position uint8  `json:"position"`
+	Id        int    `json:"id"`
+	BookId    string `json:"book_id"`
+	BookIdOld int    `json:"book_id_old"`
+	Mp3       string `json:"mp3"`
+	Pic       string `json:"pic"`
+	Position  int    `json:"position"`
 }
 
 func (ChineseBookInfo) TableName() string {

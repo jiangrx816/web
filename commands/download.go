@@ -11,8 +11,12 @@ func Download() *cli.Command {
 		Usage: "./main download",
 		Action: func(c *cli.Context) error {
 			var downloadService download_service.DownloadService
+			//downloadService.InsertChinesePictureInfo()
+			//downloadService.DownloadImgListByIds()
+
 			//将背景图与内容图进行合并成一张图片
-			//downloadService.MoveFileToPath()
+			//downloadService.FFMpegImageMergeBGToSub()
+			downloadService.MoveFileToPath()
 
 			//将图片与MP3合成为视频
 			//downloadService.FFMpegImageToVideo()
@@ -24,10 +28,10 @@ func Download() *cli.Command {
 			//downloadService.WriteFileVideo()
 
 			//将多个视频合并成一个完整的视频
-			//downloadService.MakeVideoShell()
+			downloadService.MakeVideoShell()
 
 			//删除对应的mp4文件
-			downloadService.DeleteMp4Data()
+			//downloadService.DeleteMp4Data()
 
 			return nil
 		},

@@ -69,3 +69,47 @@ func (ps *PictureService) FindChineseBookInfo(bookId string) (response pictureRe
 	db = db.Where("book_id = ?", bookId).Order("position asc").Find(&response.Info)
 	return
 }
+
+func (ps *PictureService) FindSearchChineseBookList(page int, value string) (response pictureResp.ChineseBookResponse, apiErr api.Error) {
+	utils.DefaultIntOne(&page)
+	size := common.DEFAULT_PAGE_SIZE
+	offset := size * (page - 1)
+
+	var bookList []picture.ChineseBook
+	db := model.DefaultPicture().Model(&picture.ChineseBook{}).Debug()
+	db = db.Where("status = 1 and title like ?", "%"+value+"%")
+	db = db.Count(&response.Total)
+	db = db.Order("position desc").Limit(size).Offset(offset)
+	db.Find(&bookList)
+
+	var bookInfoCountList []pictureResp.ResponseBookInfoCount
+	db1 := model.DefaultPicture().Model(&picture.ChineseBookInfo{}).Debug()
+	db1.Raw("SELECT book_id,count(id) as book_count FROM s_chinese_picture_info GROUP BY book_id").Scan(&bookInfoCountList)
+
+	var temp pictureResp.ResponseChineseBook
+	for _, item := range bookList {
+		temp.Id = item.Id
+		temp.BookId = item.BookId
+		temp.Title = item.Title
+		temp.Icon = item.Icon
+		temp.Level = item.Type
+		temp.Position = item.Position
+		response.List = append(response.List, temp)
+	}
+	for index, item := range response.List {
+		for _, it := range bookInfoCountList {
+			if item.BookId == it.BookId {
+				response.List[index].BookCount = it.BookCount
+			}
+		}
+	}
+	sort.Slice(response.List, func(i, j int) bool {
+		if response.List[i].Position > response.List[j].Position {
+			return true
+		}
+		return response.List[i].Position == response.List[j].Position && response.List[i].Id < response.List[j].Id
+	})
+	response.Page = page
+	response.TotalPage = int(math.Ceil(float64(response.Total) / float64(size)))
+	return
+}

@@ -19,6 +19,7 @@ func Picture(r *gin.RouterGroup) {
 		//汉语绘本
 		prefixRouter.Use(middleware.CheckWechatMiddleware()).GET("/chinese/getList", pictureHandler.ApiChineseBookList)
 		prefixRouter.Use(middleware.CheckWechatMiddleware()).GET("/chinese/getBookInfo", pictureHandler.ApiChineseBookInfo)
+		prefixRouter.Use(middleware.CheckWechatMiddleware()).GET("/chinese/searchList", pictureHandler.ApiChineseSearchList)
 		//英语绘本
 		prefixRouter.Use(middleware.CheckWechatMiddleware()).GET("/english/getList", pictureHandler.ApiEnglishBookList)
 		prefixRouter.Use(middleware.CheckWechatMiddleware()).GET("/english/getBookInfo", pictureHandler.ApiEnglishBookInfo)

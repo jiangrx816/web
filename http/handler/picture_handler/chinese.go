@@ -28,3 +28,15 @@ func (ph *PictureHandler) ApiChineseBookInfo(ctx *gin.Context) {
 	}
 	ctx.JSON(errs.SucResp(response))
 }
+
+// ApiChineseSearchList 汉语绘本-搜索列表
+func (ph *PictureHandler) ApiChineseSearchList(ctx *gin.Context) {
+	page, _ := strconv.Atoi(ctx.Query("page"))
+	value := ctx.Query("value")
+	response, err := ph.service.FindSearchChineseBookList(page, value)
+	if err != nil {
+		ctx.JSON(errs.ErrResp(err))
+		return
+	}
+	ctx.JSON(errs.SucResp(response))
+}

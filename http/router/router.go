@@ -29,5 +29,8 @@ func All() func(r *gin.Engine) {
 
 		// 下载库
 		Download(prefixRouter)
+
+		// 数学
+		Math(prefixRouter)
 	}
 }

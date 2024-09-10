@@ -2,6 +2,8 @@ package math_service
 
 import (
 	"github.com/jiangrx816/gopkg/server/api"
+	"math/rand"
+	"time"
 	"web/utils"
 )
 
@@ -38,6 +40,38 @@ func (ms *MathService) MakeComputeList(level, limit int) (response []MathCompute
 	switch level {
 	case 1:
 		response = ms.additionExerciseLessThanFive(5, limit)
+	case 2:
+		response = ms.subtractionUpTen(10, limit)
+	case 3:
+		response = ms.plusOrMinusTen(10, limit)
+	case 4:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 5:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 6:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 7:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 8:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 9:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 10:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 11:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 12:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 13:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 14:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 15:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 16:
+		response = ms.additionExerciseLessThanFive(5, limit)
+	case 17:
+		response = ms.additionExerciseLessThanFive(5, limit)
 	}
 	return
 }
@@ -51,6 +85,51 @@ func (ms *MathService) additionExerciseLessThanFive(max, limit int) (computeList
 		computeData.NumberTwo = b
 		computeData.Symbol = "+"
 		computeData.Result = a + b
+		computeList = append(computeList, computeData)
+	}
+	return
+}
+
+// subtractionUpTen 10以内的减法
+func (ms *MathService) subtractionUpTen(max, limit int) (computeList []MathComputeResult) {
+	var computeData MathComputeResult
+	for i := 0; i < limit; i++ {
+		a, b := utils.GenerateRandomTwoNumber(max)
+
+		if a > b {
+			a, b = b, a
+		}
+
+		computeData.NumberOne = a
+		computeData.NumberTwo = b
+		computeData.Symbol = "-"
+		computeData.Result = b - a
+		computeList = append(computeList, computeData)
+	}
+	return
+}
+
+// plusOrMinusTen 10以内的加减
+func (ms *MathService) plusOrMinusTen(max, limit int) (computeList []MathComputeResult) {
+	var computeData MathComputeResult
+	for i := 0; i < limit; i++ {
+		a, b := utils.GenerateRandomTwoNumber(max)
+
+		rand.Seed(time.Now().UnixNano()) // 设置随机种子
+		op := rand.Intn(2)               // 随机选择 0 或 1, 用于决定加法或减法
+		if op == 1 && a > b {
+			a, b = b, a
+			computeData.NumberOne = a
+			computeData.NumberTwo = b
+			computeData.Symbol = "-"
+			computeData.Result = b - a
+		} else {
+			computeData.NumberOne = a
+			computeData.NumberTwo = b
+			computeData.Symbol = "+"
+			computeData.Result = a + b
+		}
+
 		computeList = append(computeList, computeData)
 	}
 	return

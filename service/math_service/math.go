@@ -45,6 +45,14 @@ func (ms *MathService) MakeComputeList(level, limit int) (response []MathCompute
 		response = ms.exercise2(limit)
 	case 3:
 		response = ms.exercise3(limit)
+	case 4:
+		response = ms.exercise4(limit)
+	case 5:
+		response = ms.exercise5(limit)
+	case 6:
+		response = ms.exercise6(limit)
+	case 7:
+		response = ms.exercise7(limit)
 	case 8:
 		response = ms.exercise8(limit)
 	case 9:
@@ -127,6 +135,131 @@ func (ms *MathService) exercise3(limit int) (computeList []MathComputeResult) {
 	return
 }
 
+func (ms *MathService) exercise4(limit int) (computeList []MathComputeResult) {
+	var computeData MathComputeResult
+	rand.Seed(time.Now().UnixNano())
+	results := make(map[string]struct{}) // 用于存储唯一的结果
+	count := 0
+
+	for count < limit {
+		// 生成 1 到 19 之间的两个加数
+		addend1 := rand.Intn(20) + 1
+		addend2 := rand.Intn(20) + 1
+
+		// 计算和
+		sum := addend1 + addend2
+
+		// 确保结果不超过 20
+		if sum <= 20 {
+			key := fmt.Sprintf("%d + %d = %d", addend1, addend2, sum)
+			if _, exists := results[key]; !exists {
+				computeData.NumberOne = addend1
+				computeData.NumberTwo = addend2
+				computeData.Symbol = "＋"
+				computeData.Result = sum
+
+				results[key] = struct{}{}
+
+				computeList = append(computeList, computeData)
+				count++
+			}
+		}
+	}
+	return
+}
+
+func (ms *MathService) exercise5(limit int) (computeList []MathComputeResult) {
+	var computeData MathComputeResult
+	rand.Seed(time.Now().UnixNano())
+	results := make(map[string]struct{}) // 用于存储唯一的结果
+	count := 0
+
+	for count < limit {
+		// 生成 1 到 20 之间的被减数和减数
+		minuend := rand.Intn(20) + 1
+		subtrahend := rand.Intn(minuend) // 确保被减数大于减数
+
+		// 计算差值
+		difference := minuend - subtrahend
+
+		// 确保结果不为 0
+		if difference > 0 {
+			key := fmt.Sprintf("%d - %d = %d", minuend, subtrahend, difference)
+			if _, exists := results[key]; !exists {
+				computeData.NumberOne = minuend
+				computeData.NumberTwo = subtrahend
+				computeData.Symbol = "➖"
+				computeData.Result = difference
+				results[key] = struct{}{}
+				computeList = append(computeList, computeData)
+				count++
+			}
+		}
+	}
+	return
+}
+
+func (ms *MathService) exercise6(limit int) (computeList []MathComputeResult) {
+	var computeData MathComputeResult
+	rand.Seed(time.Now().UnixNano())
+	results := make(map[string]struct{}) // 用于存储唯一的结果
+	count := 0
+
+	for count < limit {
+		// 生成 1 到 19 之间的两个加数
+		addend1 := rand.Intn(20) + 1
+		addend2 := rand.Intn(20) + 1
+
+		// 计算和
+		sum := addend1 + addend2
+
+		// 确保结果大于 20（即需要进位）
+		if sum > 20 {
+			key := fmt.Sprintf("%d + %d = %d", addend1, addend2, sum)
+			if _, exists := results[key]; !exists {
+				computeData.NumberOne = addend1
+				computeData.NumberTwo = addend2
+				computeData.Symbol = "＋"
+				computeData.Result = sum
+				results[key] = struct{}{}
+				computeList = append(computeList, computeData)
+				count++
+			}
+		}
+	}
+	return
+}
+func (ms *MathService) exercise7(limit int) (computeList []MathComputeResult) {
+	var computeData MathComputeResult
+	rand.Seed(time.Now().UnixNano())
+	results := make(map[string]struct{}) // 用于存储唯一的结果
+	count := 0
+
+	for count < limit {
+		// 生成 11 到 20 之间的被减数，确保退位
+		minuend := rand.Intn(10) + 11
+		// 生成 1 到 9 之间的减数，确保退位
+		subtrahend := rand.Intn(9) + 1
+
+		// 计算差值
+		difference := minuend - subtrahend
+
+		// 确保结果不为 0
+		if difference > 0 {
+			key := fmt.Sprintf("%d - %d = %d", minuend, subtrahend, difference)
+			if _, exists := results[key]; !exists {
+				computeData.NumberOne = minuend
+				computeData.NumberTwo = subtrahend
+				computeData.Symbol = "➖"
+				computeData.Result = difference
+				results[key] = struct{}{}
+				computeList = append(computeList, computeData)
+				count++
+			}
+		}
+	}
+	return
+}
 func (ms *MathService) exercise8(limit int) (computeList []MathComputeResult) {
 	var computeData MathComputeResult
 	rand.Seed(time.Now().UnixNano())

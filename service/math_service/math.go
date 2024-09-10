@@ -100,8 +100,8 @@ func (ms *MathService) subtractionUpTen(max, limit int) (computeList []MathCompu
 			a, b = b, a
 		}
 
-		computeData.NumberOne = a
-		computeData.NumberTwo = b
+		computeData.NumberOne = b
+		computeData.NumberTwo = a
 		computeData.Symbol = "-"
 		computeData.Result = b - a
 		computeList = append(computeList, computeData)

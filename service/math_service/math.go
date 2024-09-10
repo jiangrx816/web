@@ -150,7 +150,7 @@ func (ms *MathService) exercise4(limit int) (computeList []MathComputeResult) {
 		sum := addend1 + addend2
 
 		// 确保结果不超过 20
-		if sum <= 20 {
+		if sum <= 20 && addend1 > 0 && addend2 > 0 {
 			key := fmt.Sprintf("%d + %d = %d", addend1, addend2, sum)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = addend1
@@ -183,7 +183,7 @@ func (ms *MathService) exercise5(limit int) (computeList []MathComputeResult) {
 		difference := minuend - subtrahend
 
 		// 确保结果不为 0
-		if difference > 0 {
+		if difference > 0 && subtrahend > 0 {
 			key := fmt.Sprintf("%d - %d = %d", minuend, subtrahend, difference)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = minuend
@@ -214,7 +214,7 @@ func (ms *MathService) exercise6(limit int) (computeList []MathComputeResult) {
 		sum := addend1 + addend2
 
 		// 确保结果大于 20（即需要进位）
-		if sum > 20 {
+		if sum > 20 && addend1 > 0 && addend2 > 0 {
 			key := fmt.Sprintf("%d + %d = %d", addend1, addend2, sum)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = addend1
@@ -245,7 +245,7 @@ func (ms *MathService) exercise7(limit int) (computeList []MathComputeResult) {
 		difference := minuend - subtrahend
 
 		// 确保结果不为 0
-		if difference > 0 {
+		if difference > 0 && subtrahend > 0 {
 			key := fmt.Sprintf("%d - %d = %d", minuend, subtrahend, difference)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = minuend
@@ -280,7 +280,7 @@ func (ms *MathService) exercise8(limit int) (computeList []MathComputeResult) {
 			result = addend1 + addend2
 
 			// 确保加法结果大于 10
-			if result > 10 {
+			if result > 10 && addend1 > 0 && addend2 > 0 {
 				key = fmt.Sprintf("%d + %d = %d", addend1, addend2, result)
 				computeData.NumberOne = addend1
 				computeData.NumberTwo = addend2
@@ -294,7 +294,7 @@ func (ms *MathService) exercise8(limit int) (computeList []MathComputeResult) {
 			result = minuend - subtrahend
 
 			// 确保减法结果大于 0
-			if result > 0 {
+			if result > 0 && subtrahend > 0 {
 				key = fmt.Sprintf("%d - %d = %d", minuend, subtrahend, subtrahend)
 				computeData.NumberOne = minuend
 				computeData.NumberTwo = subtrahend
@@ -330,7 +330,7 @@ func (ms *MathService) exercise9(limit int) (computeList []MathComputeResult) {
 		sum := addend1 + addend2
 
 		// 确保结果大于 10
-		if sum > 10 {
+		if sum > 10 && addend1 > 0 && addend2 > 0 {
 			key := fmt.Sprintf("%d + %d = %d", addend1, addend2, sum)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = addend1
@@ -361,7 +361,7 @@ func (ms *MathService) exercise10(limit int) (computeList []MathComputeResult) {
 		difference := minuend - subtrahend
 
 		// 确保结果大于 0
-		if difference > 0 {
+		if difference > 0 && subtrahend > 0 {
 			key := fmt.Sprintf("%d - %d = %d", minuend, subtrahend, difference)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = minuend
@@ -397,7 +397,7 @@ func (ms *MathService) exercise11(limit int) (computeList []MathComputeResult) {
 			result = addend1 + addend2
 
 			// 确保加法结果大于 10
-			if result > 10 {
+			if result > 10 && addend1 > 0 && addend2 > 0 {
 				key = fmt.Sprintf("%d + %d = %d", addend1, addend2, result)
 				computeData.NumberOne = addend1
 				computeData.NumberTwo = addend2
@@ -411,7 +411,7 @@ func (ms *MathService) exercise11(limit int) (computeList []MathComputeResult) {
 			result = minuend - subtrahend
 
 			// 确保减法结果大于 0
-			if result > 0 {
+			if result > 0 && subtrahend > 0 {
 				key = fmt.Sprintf("%d - %d = %d", minuend, subtrahend, result)
 				computeData.NumberOne = minuend
 				computeData.NumberTwo = subtrahend
@@ -447,7 +447,7 @@ func (ms *MathService) exercise12(limit int) (computeList []MathComputeResult) {
 		product := factor1 * factor2
 
 		// 确保结果不为 1
-		if product != 1 {
+		if product != 1 && factor1 > 1 && factor2 > 1 {
 			key := fmt.Sprintf("%d × %d = %d", factor1, factor2, product)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = factor1
@@ -478,7 +478,7 @@ func (ms *MathService) exercise13(limit int) (computeList []MathComputeResult) {
 		product := factor1 * factor2
 
 		// 确保结果不为 1
-		if product != 1 {
+		if product != 1 && factor1 > 1 && factor2 > 1 {
 			key := fmt.Sprintf("%d × %d = %d", factor1, factor2, product)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = factor1
@@ -509,7 +509,7 @@ func (ms *MathService) exercise14(limit int) (computeList []MathComputeResult) {
 		product := factor1 * factor2
 
 		// 确保结果不为 1
-		if product != 1 {
+		if product != 1 && factor1 > 1 && factor2 > 1 {
 			key := fmt.Sprintf("%d × %d = %d", factor1, factor2, product)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = factor1
@@ -540,7 +540,7 @@ func (ms *MathService) exercise15(limit int) (computeList []MathComputeResult) {
 		dividend := divisor * (rand.Intn(4) + 2)
 		result := dividend / divisor
 
-		if dividend%divisor == 0 && result != 1 {
+		if dividend%divisor == 0 && result != 1 && dividend > 1 && divisor > 1 {
 			key := fmt.Sprintf("%d ÷ %d = %d", dividend, divisor, result)
 			if _, exists := results[key]; !exists {
 
@@ -574,7 +574,7 @@ func (ms *MathService) exercise16(limit int) (computeList []MathComputeResult) {
 		dividend := divisor * (rand.Intn(4) + 2)
 		result := dividend / divisor
 
-		if dividend%divisor == 0 && result != 1 {
+		if dividend%divisor == 0 && result != 1 && dividend > 1 && divisor > 1 {
 			key := fmt.Sprintf("%d ÷ %d = %d", dividend, divisor, result)
 			if _, exists := results[key]; !exists {
 
@@ -608,7 +608,7 @@ func (ms *MathService) exercise17(limit int) (computeList []MathComputeResult) {
 		dividend := divisor * (rand.Intn(10/divisor) + 2)
 		result := dividend / divisor
 
-		if dividend%divisor == 0 && result != 1 {
+		if dividend%divisor == 0 && result != 1 && dividend > 1 && divisor > 1 {
 			key := fmt.Sprintf("%d ÷ %d = %d", dividend, divisor, result)
 			if _, exists := results[key]; !exists {
 				computeData.NumberOne = dividend

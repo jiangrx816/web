@@ -119,8 +119,8 @@ func (ms *MathService) plusOrMinusTen(max, limit int) (computeList []MathCompute
 		op := rand.Intn(2)               // 随机选择 0 或 1, 用于决定加法或减法
 		if op == 1 && a > b {
 			a, b = b, a
-			computeData.NumberOne = a
-			computeData.NumberTwo = b
+			computeData.NumberOne = b
+			computeData.NumberTwo = a
 			computeData.Symbol = "-"
 			computeData.Result = b - a
 		} else {

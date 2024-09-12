@@ -21,7 +21,7 @@ import (
 var counter int = 10
 var baseStep int = 0
 var step int = 1000
-var imgBaseUrl string = "https://qqavcdn.qiuqiuhuiben.com/cbook/"
+var imgBaseUrl string = ""
 var dirPathRoot string = "/Users/jiang/demo/book1"
 
 const maxConcurrent = 10

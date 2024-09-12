@@ -66,7 +66,7 @@ func (ps *PictureService) FindChineseBookList(page, level int) (response picture
 
 func (ps *PictureService) FindChineseBookInfo(bookId string) (response pictureResp.ChineseBookInfoResponse, apiErr api.Error) {
 	db := model.DefaultPicture().Model(&picture.ChineseBookInfo{}).Debug()
-	db = db.Where("book_id = ?", bookId).Order("position asc").Find(&response.Info)
+	db = db.Where("book_id = ? and status = 1", bookId).Order("position asc").Find(&response.Info)
 	return
 }
 

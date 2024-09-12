@@ -34,7 +34,7 @@ func (ps *PictureService) FindChineseBookList(page, level int) (response picture
 
 	var bookInfoCountList []pictureResp.ResponseBookInfoCount
 	db1 := model.DefaultPicture().Model(&picture.ChineseBookInfo{}).Debug()
-	db1.Raw("SELECT book_id,count(id) as book_count FROM s_chinese_picture_info GROUP BY book_id").Scan(&bookInfoCountList)
+	db1.Raw("SELECT book_id,count(id) as book_count FROM s_chinese_picture_info where status = 1 GROUP BY book_id").Scan(&bookInfoCountList)
 
 	var temp pictureResp.ResponseChineseBook
 	for _, item := range bookList {

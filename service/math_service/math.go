@@ -299,7 +299,7 @@ func (ms *MathService) exercise8(limit int) (computeList []MathComputeResult) {
 				computeData.NumberOne = minuend
 				computeData.NumberTwo = subtrahend
 				computeData.Symbol = "－"
-				computeData.Result = subtrahend
+				computeData.Result = result
 			}
 		}
 
